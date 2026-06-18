@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>龙洋蜂岛物语</title>
+
+<!-- PWA Meta -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="龙洋蜂岛物语">
+<meta name="theme-color" content="#F5A623">
+<meta name="description" content="九龙山下 · 遂昌龙洋 · 蜜蜂养成科普手游">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+  :root {
+    --honey: #F5A623; --honey-light: #FFD07B; --honey-dark: #D4891A;
+    --forest: #4A7C59; --forest-light: #7BA88A; --forest-dark: #2D5A3F;
+    --cream: #FFF8E7; --cream2: #FFF3D6; --brown: #5D4037; --brown-light: #8D6E63;
+    --sky: #87CEEB; --gold: #FFB84D; --card-bg: rgba(255,255,255,0.85);
+    --shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; }
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: #2C3E50;
+    display: flex; justify-content: center; align-items: center;
+    background-image: radial-gradient(ellipse at center, #3B5C4A 0%, #1a1a2e 100%);
+  }
+
+  .phone-frame {
+    width: 100%; max-width: 390px; height: 100%; max-height: 844px;
+    background: var(--cream); overflow: hidden; position: relative;
+    box-shadow: 0 0 0 6px #1a1a1a, 0 0 0 8px #333, 0 20px 60px rgba(0,0,0,0.5);
+    border-radius: 0;
+  }
+  @media (min-width: 430px) {
+    .phone-frame { border-radius: 44px; width: 390px; height: 844px; }
+  }
+
+  .screen-container { position:relative; width:100%; height:100%; }
+
+  .screen {
+    position: absolute; top:0; left:0; width:100%; height:100%;
+    opacity:0; transform: translateY(20px); pointer-events:none;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y:auto; overflow-x:hidden;
+  }
+  .screen.active { opacity:1; transform:translateY(0); pointer-events:all; }
+  .screen.hide-left { opacity:0; transform:translateX(-40px); }
+
+  /* === PWA Install Banner === */
+  #install-banner {
+    position:absolute; top:0; left:0; right:0; z-index:200;
+    background: linear-gradient(135deg, #F5A623, #E8961A);
+    color: white; padding: 12px 16px;
+    display: none; align-items:center; justify-content:space-between;
+    font-size:13px; font-weight:600;
+  }
+  #install-banner.show { display:flex; }
+  #install-btn {
+    background: white; color: #E8961A;
+    border: none; padding: 6px 16px; border-radius: 16px;
+    font-weight: 700; font-size: 12px; cursor:pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+  }
+  #install-dismiss {
+    background: none; border: none; color: rgba(255,255,255,0.7);
+    font-size: 18px; cursor:pointer; padding:0 4px;
+  }
+
+  /* === SCREEN 1: SPLASH === */
+  #screen-splash {
+    background: linear-gradient(180deg, #87CEEB 0%, #B8E0F7 30%, #FFF8E7 55%, #FFE0B2 100%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center;
+  }
+  .splash-mountains {
+    position:absolute; bottom:0; left:0; width:100%; height:60%; z-index:0;
+  }
+  .mountain { position:absolute; bottom:0; }
+  .mountain-1 { left:-15%; width:70%; height:70%; background:linear-gradient(175deg, #6B9B73 40%, #4A7C59 100%); border-radius:50% 50% 0 0; }
+  .mountain-2 { left:25%; width:60%; height:55%; background:linear-gradient(175deg, #7BA88A 40%, #5A8C69 100%); border-radius:50% 50% 0 0; }
+  .mountain-3 { right:-10%; width:65%; height:75%; background:linear-gradient(175deg, #5A8C69 40%, #3D6B4A 100%); border-radius:50% 50% 0 0; }
+  .mountain-label {
+    position:absolute; bottom:100px; left:50%; transform:translateX(-50%);
+    font-size:12px; color:rgba(255,255,255,0.7); font-weight:600; letter-spacing:4px;
+  }
+
+  .splash-logo {
+    position:relative; z-index:2;
+    width:120px; height:120px;
+    background:linear-gradient(135deg, #FFD07B, #F5A623);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:20px;
+    box-shadow:0 8px 32px rgba(245,166,35,0.4);
+    animation:float 3s ease-in-out infinite;
+    font-size:60px;
+  }
+  @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-12px); } }
+
+  .splash-title {
+    position:relative; z-index:2;
+    font-family:'Noto Serif SC', serif;
+    font-size:36px; font-weight:900; color:#5D4037;
+    text-shadow:2px 2px 0 rgba(255,255,255,0.6);
+    letter-spacing:4px; margin-bottom:8px;
+  }
+  .splash-subtitle { position:relative; z-index:2; font-size:13px; color:#8D6E63; letter-spacing:3px; margin-bottom:6px; }
+  .splash-origin { position:relative; z-index:2; font-size:11px; color:#8D6E63; margin-bottom:28px; letter-spacing:2px; }
+  .splash-btn {
+    position:relative; z-index:2;
+    background:linear-gradient(135deg, #F5A623, #E8961A);
+    color:white; border:none; padding:16px 56px; font-size:20px; font-weight:700;
+    border-radius:50px; cursor:pointer; letter-spacing:4px;
+    box-shadow:0 6px 24px rgba(245,166,35,0.5); transition:all 0.3s;
+    font-family:'Noto Sans SC', sans-serif;
+  }
+  .splash-btn:active { transform:scale(0.95); }
+
+  .splash-decor { position:absolute; z-index:1; animation:drift 8s ease-in-out infinite; }
+  .decor-petal-1 { top:15%; left:10%; font-size:24px; animation-delay:0s; }
+  .decor-petal-2 { top:25%; right:12%; font-size:18px; animation-delay:2s; }
+  .decor-bee-1 { top:20%; left:60%; font-size:28px; animation-delay:1s; }
+  .decor-tea { top:40%; right:15%; font-size:18px; animation-delay:3s; }
+  @keyframes drift {
+    0%,100% { transform:translateY(0) rotate(0deg); }
+    25% { transform:translateY(-15px) rotate(5deg); }
+    50% { transform:translateY(-5px) rotate(-3deg); }
+    75% { transform:translateY(-20px) rotate(3deg); }
+  }
+
+  /* === SCREEN 2: MAIN ISLAND === */
+  #screen-island {
+    background: linear-gradient(180deg, #87CEEB 0%, #B8E0F7 20%, #E8F5E9 45%, #C8E6C9 75%, #9CCC65 100%);
+  }
+  .island-header {
+    position:relative; z-index:2; padding:14px 16px 8px;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .island-level { background:var(--brown); color:white; padding:5px 14px; border-radius:20px; font-size:12px; font-weight:700; }
+  .island-resources { display:flex; gap:10px; }
+  .resource-item {
+    background:rgba(255,255,255,0.9); padding:5px 10px; border-radius:20px;
+    font-size:11px; font-weight:600; display:flex; align-items:center; gap:4px;
+    box-shadow:var(--shadow);
+  }
+
+  .island-scene { position:relative; flex:1; min-height:480px; z-index:1; overflow:hidden; }
+
+  .jiulong-mountains { position:absolute; top:10px; left:0; right:0; height:150px; z-index:0; }
+  .jiulong-peak { position:absolute; bottom:0; background:linear-gradient(175deg, #7BA88A 30%, #4A7C59 100%); border-radius:50% 50% 0 0; }
+  .jiulong-peak-1 { left:-20%; width:70%; height:130px; }
+  .jiulong-peak-2 { left:15%; width:50%; height:100px; }
+  .jiulong-peak-3 { left:40%; width:65%; height:145px; }
+  .jiulong-peak-4 { right:-15%; width:55%; height:115px; }
+  .jiulong-label {
+    position:absolute; top:8px; left:50%; transform:translateX(-50%);
+    font-size:10px; color:rgba(255,255,255,0.7); font-weight:600; letter-spacing:3px; z-index:1;
+  }
+
+  .wuxi-river {
+    position:absolute; z-index:1; bottom:180px; left:5%; right:5%; height:5px;
+    background:linear-gradient(90deg, transparent, rgba(80,160,230,0.6) 20%, rgba(60,140,220,0.8) 50%, rgba(80,160,230,0.6) 80%, transparent);
+    border-radius:3px;
+  }
+  .wuxi-label { position:absolute; right:8%; top:-16px; font-size:9px; color:rgba(60,140,200,0.7); font-weight:500; }
+  .raft { position:absolute; z-index:2; bottom:178px; left:15%; font-size:18px; animation:raftFloat 12s ease-in-out infinite; }
+  .raft-label { position:absolute; top:-14px; left:-4px; font-size:8px; color:#5D4037; font-weight:600; background:rgba(255,255,255,0.6); padding:1px 4px; border-radius:6px; white-space:nowrap; }
+  @keyframes raftFloat { 0%,100% { left:12%; } 40% { left:60%; } 70% { left:70%; } }
+
+  .island-terrain {
+    position:absolute; bottom:-20px; left:50%; transform:translateX(-50%);
+    width:400px; height:300px;
+    background:radial-gradient(ellipse at center, #9CCC65 0%, #689F38 35%, #4A7C59 100%);
+    border-radius:50% 50% 40% 40%;
+  }
+
+  .hive-node { position:absolute; z-index:3; cursor:pointer; transition:transform 0.2s; }
+  .hive-node:active { transform:scale(1.05); }
+  .hive-node-icon {
+    width:56px; height:50px; background:linear-gradient(135deg, #FFCC80, #F5A623);
+    border-radius:50% 50% 40% 40%; position:relative;
+    box-shadow:0 4px 16px rgba(0,0,0,0.15);
+    display:flex; align-items:center; justify-content:center; font-size:26px;
+  }
+  .hive-node-icon::before {
+    content:''; position:absolute; bottom:0; left:10%; width:80%; height:10px;
+    background:#8D6E63; border-radius:0 0 8px 8px;
+  }
+  .hive-label { text-align:center; font-size:10px; font-weight:600; color:#4E342E; margin-top:3px; }
+  .hive-1 { top:48%; left:10%; }
+  .hive-2 { top:28%; right:14%; }
+  .hive-3 { top:60%; right:18%; }
+  .hive-4 { top:20%; left:40%; }
+
+  .flying-bee { position:absolute; z-index:2; font-size:15px; animation:beeFly 12s ease-in-out infinite; }
+  .flying-bee:nth-child(2) { animation-delay:4s; animation-duration:10s; }
+  .flying-bee:nth-child(3) { animation-delay:8s; animation-duration:14s; font-size:11px; }
+  @keyframes beeFly {
+    0% { transform:translate(0,0) scaleX(1); } 10% { transform:translate(40px,-30px) scaleX(1); }
+    20% { transform:translate(100px,10px) scaleX(1); } 30% { transform:translate(180px,-50px) scaleX(-1); }
+    40% { transform:translate(250px,-20px) scaleX(-1); } 50% { transform:translate(200px,30px) scaleX(1); }
+    60% { transform:translate(100px,-10px) scaleX(1); } 70% { transform:translate(50px,-40px) scaleX(-1); }
+    80% { transform:translate(80px,20px) scaleX(-1); } 90% { transform:translate(140px,-15px) scaleX(1); }
+    100% { transform:translate(0,0) scaleX(1); }
+  }
+
+  .island-trees { position:absolute; z-index:1; bottom:220px; left:15px; font-size:46px; }
+  .island-trees-2 { position:absolute; z-index:1; bottom:220px; right:20px; font-size:36px; }
+
+  /* Bottom Nav */
+  .bottom-nav {
+    position:absolute; bottom:0; left:0; right:0; z-index:10;
+    background:rgba(255,255,255,0.95); backdrop-filter:blur(10px);
+    display:flex; padding:8px 0 18px; border-top:1px solid rgba(0,0,0,0.06);
+  }
+  .nav-item {
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:1px;
+    cursor:pointer; transition:all 0.2s; font-size:20px; color:#BCAAA4;
+    border:none; background:none; font-family:'Noto Sans SC', sans-serif;
+  }
+  .nav-item.active { color:#F5A623; }
+  .nav-label { font-size:9px; font-weight:500; }
+
+  /* === SCREEN 3: HIVE === */
+  #screen-hive { background:linear-gradient(180deg, #FFF8E7 0%, #FFE0B2 40%, #FFCC80 100%); }
+  .hive-header { padding:14px 16px; display:flex; align-items:center; gap:10px; position:relative; z-index:2; }
+  .back-btn {
+    width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.8);
+    border:none; font-size:16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow);
+  }
+  .hive-title-section { flex:1; }
+  .hive-name { font-size:18px; font-weight:700; color:#4E342E; }
+  .hive-status { font-size:11px; color:#8D6E63; display:flex; align-items:center; gap:4px; }
+  .status-dot { width:7px; height:7px; border-radius:50%; background:#4CAF50; animation:pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+  .hive-content { padding:0 16px; position:relative; z-index:2; }
+
+  .honey-info-badge {
+    background:rgba(255,183,77,0.15); border:1px dashed #F5A623;
+    border-radius:12px; padding:8px 12px; margin-bottom:14px;
+    display:flex; align-items:center; gap:6px;
+    font-size:10px; color:#8D6E63;
+  }
+
+  .hive-cross-section {
+    background:linear-gradient(180deg, rgba(255,224,178,0.6), rgba(255,204,128,0.6));
+    border-radius:18px; padding:16px;
+    border:2px solid rgba(139,90,43,0.2); margin-bottom:14px;
+  }
+  .hive-section-title { font-size:13px; font-weight:700; color:#5D4037; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+
+  .bee-stats { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:14px; }
+  .bee-stat { background:rgba(255,255,255,0.7); border-radius:10px; padding:8px; text-align:center; }
+  .bee-stat-value { font-size:20px; font-weight:700; color:#E8961A; }
+  .bee-stat-label { font-size:10px; color:#8D6E63; margin-top:2px; }
+
+  .honeycomb-grid { display:flex; gap:5px; margin-bottom:14px; justify-content:center; }
+  .honeycomb-cell {
+    width:40px; height:46px;
+    clip-path:polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    background:linear-gradient(135deg, #FFE0B2, #FFCC80); position:relative; overflow:hidden;
+  }
+  .honeycomb-cell .fill { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(180deg, #FFB84D, #F5A623); }
+  .honeycomb-cell:nth-child(1) .fill { height:85%; } .honeycomb-cell:nth-child(2) .fill { height:55%; }
+  .honeycomb-cell:nth-child(3) .fill { height:95%; } .honeycomb-cell:nth-child(4) .fill { height:30%; }
+  .honeycomb-cell:nth-child(5) .fill { height:65%; }
+
+  .queen-bee-card {
+    background:linear-gradient(135deg, #FFF3D6, #FFE0B2); border-radius:12px; padding:12px;
+    display:flex; align-items:center; gap:10px; border:2px solid #F5A623; margin-bottom:14px;
+  }
+  .queen-bee-icon { font-size:32px; }
+  .queen-bee-info { flex:1; }
+  .queen-bee-name { font-size:14px; font-weight:700; color:#5D4037; }
+  .queen-bee-desc { font-size:10px; color:#8D6E63; margin-top:2px; }
+
+  .hive-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .hive-action-btn {
+    padding:12px; border-radius:12px; border:none; font-size:13px; font-weight:600;
+    cursor:pointer; transition:all 0.2s;
+    font-family:'Noto Sans SC', sans-serif; display:flex; flex-direction:column; align-items:center; gap:3px;
+  }
+  .hive-action-btn:active { transform:scale(0.95); }
+  .btn-feed { background:#FFE0B2; color:#E65100; }
+  .btn-clean { background:#E1F5FE; color:#0277BD; }
+  .btn-harvest { background:#FFF9C4; color:#F57F17; }
+  .btn-expand { background:#E8F5E9; color:#2E7D32; }
+
+  /* === SCREEN 4: WORKSHOP === */
+  #screen-workshop { background:linear-gradient(180deg, #FFFDE7 0%, #FFF8E1 40%, #FFE0B2 100%); }
+  .workshop-header { padding:16px; text-align:center; position:relative; z-index:2; }
+  .workshop-title { font-size:20px; font-weight:700; color:#4E342E; }
+  .workshop-subtitle { font-size:11px; color:#8D6E63; margin-top:2px; }
+  .geographic-badge {
+    display:inline-flex; align-items:center; gap:4px;
+    background:#FFF3D6; border:1px solid #F5A623;
+    padding:3px 10px; border-radius:12px; font-size:9px; font-weight:600; color:#E8961A; margin-top:4px;
+  }
+
+  .honey-collection { padding:0 16px; position:relative; z-index:2; }
+  .honey-jars { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+  .honey-jar-card {
+    background:rgba(255,255,255,0.8); border-radius:16px; padding:14px;
+    text-align:center; box-shadow:var(--shadow); cursor:pointer; transition:all 0.3s;
+  }
+  .honey-jar-card:active { transform:scale(0.96); }
+  .honey-jar-icon { font-size:40px; margin-bottom:6px; }
+  .honey-jar-name { font-size:13px; font-weight:600; color:#5D4037; }
+  .honey-jar-desc { font-size:10px; color:#8D6E63; margin-top:2px; }
+  .honey-jar-tag { display:inline-block; font-size:8px; padding:2px 6px; border-radius:6px; margin-top:3px; background:#FFF9C4; color:#F57F17; font-weight:600; }
+  .honey-progress { height:5px; background:#FFE0B2; border-radius:2px; margin-top:6px; overflow:hidden; }
+  .honey-progress-bar { height:100%; background:linear-gradient(90deg, #F5A623, #FFB84D); border-radius:2px; }
+
+  .harvest-station {
+    background:linear-gradient(135deg, #FFF3D6, #FFE0B2); border-radius:18px; padding:16px;
+    text-align:center; margin-bottom:14px; border:2px dashed #F5A623;
+  }
+  .harvest-station-title { font-size:14px; font-weight:700; color:#5D4037; margin-bottom:6px; }
+  .harvest-jar { font-size:44px; animation:jarBounce 2s ease-in-out infinite; cursor:pointer; }
+  @keyframes jarBounce {
+    0%,100% { transform:translateY(0); } 30% { transform:translateY(-8px); }
+    50% { transform:translateY(0); } 70% { transform:translateY(-4px); }
+  }
+  .harvest-hint { font-size:10px; color:#8D6E63; margin-top:4px; }
+
+  /* === SCREEN 5: ENCYCLOPEDIA === */
+  #screen-encyclopedia { background:linear-gradient(180deg, #F1F8E9 0%, #E8F5E9 40%, #C8E6C9 100%); }
+  .encyclopedia-header { padding:16px; text-align:center; position:relative; z-index:2; }
+  .encyclopedia-title { font-size:20px; font-weight:700; color:#2E4A1F; }
+  .encyclopedia-progress { font-size:11px; color:#558B2F; margin-top:4px; }
+
+  .bee-cards { padding:0 16px 16px; position:relative; z-index:2; display:flex; flex-direction:column; gap:12px; }
+  .bee-card {
+    background:rgba(255,255,255,0.85); border-radius:16px; padding:14px;
+    display:flex; align-items:center; gap:12px; box-shadow:var(--shadow); transition:all 0.3s; cursor:pointer;
+  }
+  .bee-card:active { transform:scale(0.98); }
+  .bee-card-icon {
+    width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg, #FFE0B2, #FFCC80);
+    display:flex; align-items:center; justify-content:center; font-size:26px; flex-shrink:0;
+  }
+  .bee-card-info { flex:1; }
+  .bee-card-name { font-size:15px; font-weight:700; color:#4E342E; }
+  .bee-card-scientific { font-size:9px; color:#8D6E63; font-style:italic; margin-top:1px; }
+  .bee-card-desc { font-size:11px; color:#6D4C41; margin-top:3px; line-height:1.4; }
+  .bee-card-location { font-size:9px; color:#4A7C59; font-weight:600; margin-top:3px; display:flex; align-items:center; gap:4px; }
+  .bee-card-badge { padding:3px 8px; border-radius:10px; font-size:9px; font-weight:600; }
+  .badge-unlocked { background:#E8F5E9; color:#2E7D32; }
+  .badge-locked { background:#F5F5F5; color:#BDBDBD; }
+
+  /* === SCREEN 6: QUESTS === */
+  #screen-quests { background:linear-gradient(180deg, #FFF8E1 0%, #FFF3D6 40%, #FFE0B2 100%); }
+  .quests-header { padding:16px; text-align:center; position:relative; z-index:2; }
+  .quests-title { font-size:20px; font-weight:700; color:#4E342E; }
+  .quests-date { font-size:11px; color:#8D6E63; margin-top:2px; }
+
+  .quests-content { padding:0 16px 16px; position:relative; z-index:2; }
+  .quest-section-title { font-size:14px; font-weight:700; color:#5D4037; margin-bottom:10px; margin-top:14px; display:flex; align-items:center; gap:6px; }
+
+  .quest-item {
+    background:rgba(255,255,255,0.85); border-radius:14px; padding:12px; margin-bottom:8px;
+    box-shadow:var(--shadow); display:flex; align-items:center; gap:10px;
+  }
+  .quest-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+  .quest-icon-feed { background:#FFE0B2; } .quest-icon-harvest { background:#FFF9C4; }
+  .quest-icon-explore { background:#E1F5FE; } .quest-icon-science { background:#E8F5E9; }
+  .quest-icon-culture { background:#F3E5F5; }
+
+  .quest-info { flex:1; }
+  .quest-name { font-size:13px; font-weight:600; color:#4E342E; }
+  .quest-progress-text { font-size:10px; color:#8D6E63; margin-top:1px; }
+  .quest-bar { height:5px; background:#F5F5F5; border-radius:2px; margin-top:5px; overflow:hidden; }
+  .quest-bar-fill { height:100%; border-radius:2px; background:linear-gradient(90deg, #F5A623, #FFB84D); }
+
+  .achievement-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .achievement-item { background:rgba(255,255,255,0.85); border-radius:12px; padding:10px; text-align:center; box-shadow:var(--shadow); }
+  .achievement-icon { font-size:28px; margin-bottom:4px; }
+  .achievement-name { font-size:10px; font-weight:600; color:#5D4037; }
+  .achievement-locked { opacity:0.4; }
+
+  /* === TOAST === */
+  .toast {
+    position:absolute; top:50px; left:50%; transform:translateX(-50%);
+    background:rgba(62,39,35,0.9); color:white;
+    padding:8px 20px; border-radius:20px;
+    font-size:12px; font-weight:600;
+    z-index:100; opacity:0; pointer-events:none;
+    transition:opacity 0.3s;
+  }
+  .toast.show { opacity:1; }
+
+  .screen::-webkit-scrollbar { width:0; }
+</style>
+</head>
+<body>
+
+<div class="phone-frame" id="app">
+  <!-- PWA Install Banner -->
+  <div id="install-banner">
+    <span>📱 安装到桌面，像 App 一样使用</span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button id="install-btn" onclick="installPWA()">安装</button>
+      <button id="install-dismiss" onclick="dismissInstall()">×</button>
+    </div>
+  </div>
+
+  <div class="screen-container">
+
+    <!-- SCREEN 1: SPLASH -->
+    <div class="screen active" id="screen-splash">
+      <div class="splash-mountains">
+        <div class="mountain mountain-1"></div><div class="mountain mountain-2"></div><div class="mountain mountain-3"></div>
+        <div class="mountain-label">九 龙 山</div>
+      </div>
+      <div class="splash-decor decor-petal-1">🌸</div>
+      <div class="splash-decor decor-petal-2">🌼</div>
+      <div class="splash-decor decor-bee-1">🐝</div>
+      <div class="splash-decor decor-tea">🍵</div>
+
+      <div class="splash-logo">🐝</div>
+      <div class="splash-title">龙洋蜂岛物语</div>
+      <div class="splash-subtitle">九龙山下 · 遂昌龙洋 · 蜜蜂养成手游</div>
+      <div class="splash-origin">外龙口 × 埠头洋 — 两溪交汇成「龙洋」</div>
+      <button class="splash-btn" onclick="navigateTo('island')">开 始 冒 险</button>
+    </div>
+
+    <!-- SCREEN 2: MAIN ISLAND -->
+    <div class="screen" id="screen-island">
+      <div class="island-header">
+        <div class="island-level">🏔️ 九龙口村 · Lv.6</div>
+        <div class="island-resources">
+          <div class="resource-item">🍯 2,480</div>
+          <div class="resource-item">⚡ 85/100</div>
+        </div>
+      </div>
+      <div class="island-scene">
+        <div class="jiulong-mountains">
+          <div class="jiulong-peak jiulong-peak-1"></div><div class="jiulong-peak jiulong-peak-2"></div>
+          <div class="jiulong-peak jiulong-peak-3"></div><div class="jiulong-peak jiulong-peak-4"></div>
+          <div class="jiulong-label">🏔️ 九龙山国家级自然保护区</div>
+        </div>
+        <div class="flying-bee" style="top:12%;left:10%;">🐝</div>
+        <div class="flying-bee" style="top:22%;left:35%;">🐝</div>
+        <div class="flying-bee" style="top:18%;left:55%;">🐝</div>
+        <div class="island-terrain"></div>
+        <div class="wuxi-river"><span class="wuxi-label">乌溪江</span></div>
+        <div class="raft"><span class="raft-label">龙排</span>🛶</div>
+        <div class="island-trees">🌳</div><div class="island-trees-2">🌲</div>
+
+        <div class="hive-node hive-1" onclick="navigateTo('hive')">
+          <div class="hive-node-icon">🏠</div><div class="hive-label">外龙口蜂场</div>
+        </div>
+        <div class="hive-node hive-2" onclick="showToast('埠头洋蜜源：高山野花盛开，蜜蜂采蜜忙 🌺')">
+          <div class="hive-node-icon">🌺</div><div class="hive-label">埠头洋蜜源</div>
+        </div>
+        <div class="hive-node hive-3" onclick="showToast('九龙山野蜂区：国家级自然保护区，野生蜜源丰富 🏔️')">
+          <div class="hive-node-icon">🏔️</div><div class="hive-label">九龙山野蜂区</div>
+        </div>
+        <div class="hive-node hive-4" onclick="showToast('阿土哥：我爷爷那辈就开始养蜂了，三代人的手艺传给你！🧑‍🌾')">
+          <div class="hive-node-icon">🧑‍🌾</div><div class="hive-label">阿土哥蜂坊</div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-item active" onclick="navigateTo('island')">🏝️<span class="nav-label">蜂岛</span></button>
+        <button class="nav-item" onclick="navigateTo('hive')">🏠<span class="nav-label">蜂巢</span></button>
+        <button class="nav-item" onclick="navigateTo('workshop')">🍯<span class="nav-label">采蜜</span></button>
+        <button class="nav-item" onclick="navigateTo('encyclopedia')">📖<span class="nav-label">图鉴</span></button>
+        <button class="nav-item" onclick="navigateTo('quests')">📋<span class="nav-label">任务</span></button>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: HIVE -->
+    <div class="screen" id="screen-hive">
+      <div class="hive-header">
+        <button class="back-btn" onclick="navigateTo('island')">←</button>
+        <div class="hive-title-section">
+          <div class="hive-name">外龙口蜂场 #1</div>
+          <div class="hive-status"><span class="status-dot"></span>蜂群活跃中 · 九龙山中华蜜蜂</div>
+        </div>
+      </div>
+      <div class="hive-content">
+        <div class="honey-info-badge">🏅 中国地理标志农产品 · 遂昌土蜂蜜 · 一年只取1-2次自然封盖蜜</div>
+        <div class="hive-cross-section">
+          <div class="hive-section-title">🐝 蜂群概览</div>
+          <div class="bee-stats">
+            <div class="bee-stat"><div class="bee-stat-value">12,500</div><div class="bee-stat-label">蜂群数量</div></div>
+            <div class="bee-stat"><div class="bee-stat-value">98%</div><div class="bee-stat-label">健康指数</div></div>
+            <div class="bee-stat"><div class="bee-stat-value">85%</div><div class="bee-stat-label">封盖成熟率</div></div>
+            <div class="bee-stat"><div class="bee-stat-value">800m</div><div class="bee-stat-label">蜂场海拔</div></div>
+          </div>
+          <div class="hive-section-title">🍯 蜜脾状态</div>
+          <div class="honeycomb-grid">
+            <div class="honeycomb-cell"><div class="fill"></div></div>
+            <div class="honeycomb-cell"><div class="fill"></div></div>
+            <div class="honeycomb-cell"><div class="fill"></div></div>
+            <div class="honeycomb-cell"><div class="fill"></div></div>
+            <div class="honeycomb-cell"><div class="fill"></div></div>
+          </div>
+        </div>
+        <div class="queen-bee-card">
+          <div class="queen-bee-icon">👑</div>
+          <div class="queen-bee-info">
+            <div class="queen-bee-name">蜂后 · 九龙山一号</div>
+            <div class="queen-bee-desc">中华蜜蜂(Apis cerana) | 日产卵: 1200粒 | 已服役 18 天</div>
+          </div>
+          <div style="font-size:12px; color:#F5A623;">⭐ 4.8</div>
+        </div>
+        <div class="hive-actions">
+          <button class="hive-action-btn btn-feed" onclick="showToast('喂食九龙山百花粉，蜂群活力+5！🌺')">🌺<span>喂食花粉</span></button>
+          <button class="hive-action-btn btn-clean" onclick="showToast('清洁完成！健康指数+3 🧹')">🧹<span>清洁蜂巢</span></button>
+          <button class="hive-action-btn btn-harvest" onclick="navigateTo('workshop')">🍯<span>采收封盖蜜</span></button>
+          <button class="hive-action-btn btn-expand" onclick="showToast('扩建巢脾中...还需2小时 📐')">📐<span>扩建巢脾</span></button>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-item" onclick="navigateTo('island')">🏝️<span class="nav-label">蜂岛</span></button>
+        <button class="nav-item active" onclick="navigateTo('hive')">🏠<span class="nav-label">蜂巢</span></button>
+        <button class="nav-item" onclick="navigateTo('workshop')">🍯<span class="nav-label">采蜜</span></button>
+        <button class="nav-item" onclick="navigateTo('encyclopedia')">📖<span class="nav-label">图鉴</span></button>
+        <button class="nav-item" onclick="navigateTo('quests')">📋<span class="nav-label">任务</span></button>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: WORKSHOP -->
+    <div class="screen" id="screen-workshop">
+      <div class="workshop-header">
+        <div class="workshop-title">🍯 采蜜工坊</div>
+        <div class="workshop-subtitle">龙洋蜂岛 · 天然封盖蜜采收</div>
+        <div class="geographic-badge">🏅 中国地理标志农产品 · 遂昌土蜂蜜</div>
+      </div>
+      <div class="honey-collection">
+        <div class="honey-jars">
+          <div class="honey-jar-card" onclick="showToast('九龙山百花蜜：高山百花酿造，琥珀色泽 +200🍯')">
+            <div class="honey-jar-icon">🍯</div>
+            <div class="honey-jar-name">九龙山百花蜜</div>
+            <div class="honey-jar-desc">九龙山自然保护区 · 百花酿造</div>
+            <span class="honey-jar-tag">琥珀色</span>
+            <div class="honey-progress"><div class="honey-progress-bar" style="width:90%"></div></div>
+          </div>
+          <div class="honey-jar-card" onclick="showToast('乌溪江荆条蜜还需2小时封盖成熟')">
+            <div class="honey-jar-icon">🍯</div>
+            <div class="honey-jar-name">乌溪江荆条蜜</div>
+            <div class="honey-jar-desc">乌溪江畔荆条花 · 结晶细腻</div>
+            <span class="honey-jar-tag">清香型</span>
+            <div class="honey-progress"><div class="honey-progress-bar" style="width:45%"></div></div>
+          </div>
+          <div class="honey-jar-card" onclick="showToast('埠头洋洋槐蜜还需4小时封盖成熟')">
+            <div class="honey-jar-icon">🍯</div>
+            <div class="honey-jar-name">埠头洋洋槐蜜</div>
+            <div class="honey-jar-desc">埠头洋高山洋槐 · 水白透亮</div>
+            <span class="honey-jar-tag">清甜型</span>
+            <div class="honey-progress"><div class="honey-progress-bar" style="width:25%"></div></div>
+          </div>
+          <div class="honey-jar-card" onclick="showToast('龙洋土蜂蜜：地理标志产品，已可采收！🎉')">
+            <div class="honey-jar-icon">🫙</div>
+            <div class="honey-jar-name">龙洋土蜂蜜</div>
+            <div class="honey-jar-desc">遂昌龙洋 · 自然封盖 · 一年仅取2次</div>
+            <span class="honey-jar-tag" style="background:#FFE0B2;color:#E65100;">地理标志</span>
+            <div class="honey-progress"><div class="honey-progress-bar" style="width:100%; background:linear-gradient(90deg,#FFB84D,#E8961A)"></div></div>
+          </div>
+        </div>
+        <div class="harvest-station">
+          <div class="harvest-station-title">🎯 采收成熟封盖蜜</div>
+          <div class="harvest-jar" onclick="harvestHoney()">🫙</div>
+          <div class="harvest-hint">点击蜜罐采收 · 自然成熟才够香</div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-item" onclick="navigateTo('island')">🏝️<span class="nav-label">蜂岛</span></button>
+        <button class="nav-item" onclick="navigateTo('hive')">🏠<span class="nav-label">蜂巢</span></button>
+        <button class="nav-item active" onclick="navigateTo('workshop')">🍯<span class="nav-label">采蜜</span></button>
+        <button class="nav-item" onclick="navigateTo('encyclopedia')">📖<span class="nav-label">图鉴</span></button>
+        <button class="nav-item" onclick="navigateTo('quests')">📋<span class="nav-label">任务</span></button>
+      </div>
+    </div>
+
+    <!-- SCREEN 5: ENCYCLOPEDIA -->
+    <div class="screen" id="screen-encyclopedia">
+      <div class="encyclopedia-header">
+        <div class="encyclopedia-title">📖 蜂种图鉴</div>
+        <div class="encyclopedia-progress">已解锁 3/8 · 探索龙洋蜂岛解锁更多</div>
+      </div>
+      <div class="bee-cards">
+        <div class="bee-card" onclick="showToast('中华蜜蜂：龙洋蜂岛优势蜂种，九龙山自然保护区核心种群')">
+          <div class="bee-card-icon">🐝</div>
+          <div class="bee-card-info">
+            <div class="bee-card-name">中华蜜蜂</div>
+            <div class="bee-card-scientific">Apis cerana cerana</div>
+            <div class="bee-card-desc">中国本土蜂种，抗寒耐热，善于采集零星山花蜜源。龙洋蜂岛优势种群。</div>
+            <div class="bee-card-location">📍 九龙山国家级自然保护区</div>
+          </div>
+          <span class="bee-card-badge badge-unlocked">已解锁</span>
+        </div>
+        <div class="bee-card" onclick="showToast('意大利蜂：阿土哥从桐乡引进的优良品种，产蜜量高')">
+          <div class="bee-card-icon">🐝</div>
+          <div class="bee-card-info">
+            <div class="bee-card-name">意大利蜂</div>
+            <div class="bee-card-scientific">Apis mellifera ligustica</div>
+            <div class="bee-card-desc">原产意大利，性情温驯，产蜜能力强。阿土哥从嘉兴桐乡引进。</div>
+            <div class="bee-card-location">📍 外龙口蜂场</div>
+          </div>
+          <span class="bee-card-badge badge-unlocked">已解锁</span>
+        </div>
+        <div class="bee-card" onclick="showToast('九龙山黑蜂：高海拔特有变种，耐寒性极强')">
+          <div class="bee-card-icon">🐝</div>
+          <div class="bee-card-info">
+            <div class="bee-card-name">九龙山黑蜂</div>
+            <div class="bee-card-scientific">Apis cerana (Jiulong variant)</div>
+            <div class="bee-card-desc">九龙山高海拔特有变种，体型略大，能在海拔1500m以上山区越冬。</div>
+            <div class="bee-card-location">📍 九龙山高海拔野蜂区</div>
+          </div>
+          <span class="bee-card-badge badge-unlocked">已解锁</span>
+        </div>
+        <div class="bee-card">
+          <div class="bee-card-icon">🐻</div>
+          <div class="bee-card-info">
+            <div class="bee-card-name">熊蜂</div>
+            <div class="bee-card-scientific">Bombus spp.</div>
+            <div class="bee-card-desc">体型较大，浑身绒毛，九龙山茶园和蔬菜大棚的天然授粉专家。</div>
+            <div class="bee-card-location">📍 龙洋茶园</div>
+          </div>
+          <span class="bee-card-badge badge-locked">🔒 探索解锁</span>
+        </div>
+        <div class="bee-card">
+          <div class="bee-card-icon">🪲</div>
+          <div class="bee-card-info">
+            <div class="bee-card-name">壁蜂</div>
+            <div class="bee-card-scientific">Osmia spp.</div>
+            <div class="bee-card-desc">独居蜂类，授粉效率是蜜蜂的80倍，乌溪江畔竹林常见。</div>
+            <div class="bee-card-location">📍 乌溪江竹林</div>
+          </div>
+          <span class="bee-card-badge badge-locked">🔒 探索解锁</span>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-item" onclick="navigateTo('island')">🏝️<span class="nav-label">蜂岛</span></button>
+        <button class="nav-item" onclick="navigateTo('hive')">🏠<span class="nav-label">蜂巢</span></button>
+        <button class="nav-item" onclick="navigateTo('workshop')">🍯<span class="nav-label">采蜜</span></button>
+        <button class="nav-item active" onclick="navigateTo('encyclopedia')">📖<span class="nav-label">图鉴</span></button>
+        <button class="nav-item" onclick="navigateTo('quests')">📋<span class="nav-label">任务</span></button>
+      </div>
+    </div>
+
+    <!-- SCREEN 6: QUESTS -->
+    <div class="screen" id="screen-quests">
+      <div class="quests-header">
+        <div class="quests-title">📋 任务成就</div>
+        <div class="quests-date">2026年6月 · 龙洋蜂岛第三周</div>
+      </div>
+      <div class="quests-content">
+        <div class="quest-section-title">📌 每日任务</div>
+        <div class="quest-item">
+          <div class="quest-icon quest-icon-feed">🌺</div>
+          <div class="quest-info"><div class="quest-name">喂食蜜蜂 3 次</div><div class="quest-progress-text">进度: 2/3</div><div class="quest-bar"><div class="quest-bar-fill" style="width:67%"></div></div></div>
+        </div>
+        <div class="quest-item">
+          <div class="quest-icon quest-icon-harvest">🍯</div>
+          <div class="quest-info"><div class="quest-name">采收封盖成熟蜜 1 次</div><div class="quest-progress-text">进度: 1/1 · 已完成</div><div class="quest-bar"><div class="quest-bar-fill" style="width:100%; background:#4CAF50"></div></div></div>
+        </div>
+        <div class="quest-item">
+          <div class="quest-icon quest-icon-explore">🔍</div>
+          <div class="quest-info"><div class="quest-name">探索九龙山野蜂区</div><div class="quest-progress-text">进度: 0/1</div><div class="quest-bar"><div class="quest-bar-fill" style="width:0%"></div></div></div>
+        </div>
+
+        <div class="quest-section-title" style="margin-top:16px;">🎭 龙洋非遗文化任务</div>
+        <div class="quest-item">
+          <div class="quest-icon quest-icon-culture">🎋</div>
+          <div class="quest-info"><div class="quest-name">制作遂昌长粽</div><div class="quest-progress-text">龙洋非遗技艺 · 完成解锁「粽香蜂岛」称号</div><div class="quest-bar"><div class="quest-bar-fill" style="width:0%"></div></div></div>
+        </div>
+        <div class="quest-item">
+          <div class="quest-icon quest-icon-culture">🛶</div>
+          <div class="quest-info"><div class="quest-name">放龙排 · 乌溪江漂流</div><div class="quest-progress-text">龙排制作技艺 · 漂流解锁新蜂场</div><div class="quest-bar"><div class="quest-bar-fill" style="width:0%"></div></div></div>
+        </div>
+        <div class="quest-item">
+          <div class="quest-icon quest-icon-culture">🥋</div>
+          <div class="quest-info"><div class="quest-name">学习茶园传统武术</div><div class="quest-progress-text">龙洋非遗 · 茶园武术传承人传授</div><div class="quest-bar"><div class="quest-bar-fill" style="width:0%"></div></div></div>
+        </div>
+        <div class="quest-item">
+          <div class="quest-icon quest-icon-culture">🎨</div>
+          <div class="quest-info"><div class="quest-name">绘制蜜蜂糖画</div><div class="quest-progress-text">龙洋非遗糖画 · 用蜂蜜制作蜜蜂造型</div><div class="quest-bar"><div class="quest-bar-fill" style="width:0%"></div></div></div>
+        </div>
+
+        <div class="quest-section-title" style="margin-top:16px;">🏆 成就徽章</div>
+        <div class="achievement-grid">
+          <div class="achievement-item"><div class="achievement-icon">🌱</div><div class="achievement-name">新手蜂农</div></div>
+          <div class="achievement-item"><div class="achievement-icon">🍯</div><div class="achievement-name">首次采蜜</div></div>
+          <div class="achievement-item"><div class="achievement-icon">📖</div><div class="achievement-name">蜂种学徒</div></div>
+          <div class="achievement-item"><div class="achievement-icon">🎋</div><div class="achievement-name">长粽传承人</div></div>
+          <div class="achievement-item achievement-locked"><div class="achievement-icon">🏅</div><div class="achievement-name">养蜂达人</div></div>
+          <div class="achievement-item achievement-locked"><div class="achievement-icon">👑</div><div class="achievement-name">蜂王培育者</div></div>
+          <div class="achievement-item achievement-locked"><div class="achievement-icon">🏔️</div><div class="achievement-name">九龙山守护者</div></div>
+          <div class="achievement-item achievement-locked"><div class="achievement-icon">🛶</div><div class="achievement-name">龙排大师</div></div>
+          <div class="achievement-item achievement-locked"><div class="achievement-icon">🌟</div><div class="achievement-name">龙洋蜂岛传说</div></div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-item" onclick="navigateTo('island')">🏝️<span class="nav-label">蜂岛</span></button>
+        <button class="nav-item" onclick="navigateTo('hive')">🏠<span class="nav-label">蜂巢</span></button>
+        <button class="nav-item" onclick="navigateTo('workshop')">🍯<span class="nav-label">采蜜</span></button>
+        <button class="nav-item" onclick="navigateTo('encyclopedia')">📖<span class="nav-label">图鉴</span></button>
+        <button class="nav-item active" onclick="navigateTo('quests')">📋<span class="nav-label">任务</span></button>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<script>
+// === PWA Install Logic ===
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner').classList.add('show');
+});
+
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('install-banner').classList.remove('show');
+    });
+  }
+}
+
+function dismissInstall() {
+  document.getElementById('install-banner').classList.remove('show');
+}
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-banner').classList.remove('show');
+});
+
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+
+// === Navigation ===
+const screens = {
+  splash:'screen-splash', island:'screen-island', hive:'screen-hive',
+  workshop:'screen-workshop', encyclopedia:'screen-encyclopedia', quests:'screen-quests'
+};
+let currentScreen = 'splash';
+
+function navigateTo(target) {
+  if (target === currentScreen) return;
+  const oldEl = document.getElementById(screens[currentScreen]);
+  const newEl = document.getElementById(screens[target]);
+  if (!oldEl || !newEl) return;
+
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    const label = btn.querySelector('.nav-label')?.textContent;
+    const screenMap = { '蜂岛':'island', '蜂巢':'hive', '采蜜':'workshop', '图鉴':'encyclopedia', '任务':'quests' };
+    btn.classList.toggle('active', screenMap[label] === target);
+  });
+
+  oldEl.classList.remove('active');
+  oldEl.classList.add('hide-left');
+  newEl.classList.add('active');
+  newEl.scrollTop = 0;
+  setTimeout(() => oldEl.classList.remove('hide-left'), 500);
+  currentScreen = target;
+}
+
+let toastTimer;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  clearTimeout(toastTimer);
+  toast.textContent = msg;
+  toast.classList.add('show');
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+function harvestHoney() {
+  showToast('🎉 采收成功！获得 龙洋土蜂蜜 ×1 +200🍯');
+  const jar = document.querySelector('.harvest-jar');
+  jar.style.transform = 'scale(1.3)';
+  setTimeout(() => { jar.style.transform = ''; }, 300);
+}
+
+document.body.addEventListener('touchmove', function(e) {
+  if (e.target.closest('.screen')) return;
+  e.preventDefault();
+}, { passive: false });
+</script>
+
+</body>
+</html>

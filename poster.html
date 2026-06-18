@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    width: 3508px; height: 4960px;
+    font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(160deg, #FFF8E7 0%, #FFF3D6 30%, #FFE4B5 60%, #FFD07B 100%);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Background decorative elements */
+  .bg-hex {
+    position: absolute; opacity: 0.06;
+    width: 300px; height: 340px;
+    background: #F5A623;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+
+  .bg-mountain {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 800px;
+    background: linear-gradient(180deg, transparent 0%, rgba(74,124,89,0.15) 40%, rgba(45,90,63,0.25) 100%);
+    clip-path: polygon(0% 60%, 8% 35%, 16% 50%, 24% 28%, 32% 45%, 40% 22%, 48% 40%, 56% 18%, 64% 38%, 72% 25%, 80% 42%, 88% 30%, 96% 48%, 100% 35%, 100% 100%, 0% 100%);
+  }
+
+  /* Title area */
+  .title-area {
+    position: absolute; top: 120px; left: 0; right: 0;
+    text-align: center; z-index: 10;
+  }
+
+  .title-cn {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 220px; font-weight: 900;
+    color: #4E342E;
+    text-shadow: 8px 8px 0 rgba(245,166,35,0.3), 0 0 80px rgba(255,208,123,0.5);
+    letter-spacing: 30px;
+    line-height: 1.1;
+  }
+
+  .title-sub {
+    font-size: 72px; font-weight: 300;
+    color: #5D4037;
+    letter-spacing: 18px;
+    margin-top: 30px;
+  }
+
+  .title-en {
+    font-size: 48px; font-weight: 300;
+    color: #8D6E63;
+    letter-spacing: 8px;
+    margin-top: 15px;
+  }
+
+  /* Location tag */
+  .location-tag {
+    display: inline-block;
+    margin-top: 50px;
+    padding: 24px 80px;
+    background: linear-gradient(135deg, #F5A623, #D4891A);
+    color: #fff;
+    font-size: 44px; font-weight: 700;
+    border-radius: 60px;
+    letter-spacing: 12px;
+    box-shadow: 0 12px 40px rgba(245,166,35,0.4);
+  }
+
+  /* Feature grid */
+  .features {
+    position: absolute; top: 1150px; left: 160px; right: 160px;
+    display: flex; gap: 50px; z-index: 10;
+  }
+
+  .feature-card {
+    flex: 1;
+    background: rgba(255,255,255,0.82);
+    backdrop-filter: blur(10px);
+    border-radius: 48px;
+    padding: 60px 40px 50px;
+    text-align: center;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.08);
+    border: 3px solid rgba(245,166,35,0.15);
+  }
+
+  .feature-icon {
+    font-size: 120px;
+    margin-bottom: 30px;
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.1));
+  }
+
+  .feature-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 48px; font-weight: 700;
+    color: #4E342E;
+    margin-bottom: 20px;
+  }
+
+  .feature-desc {
+    font-size: 32px; font-weight: 300;
+    color: #5D4037;
+    line-height: 1.6;
+  }
+
+  /* Bottom showcase */
+  .showcase {
+    position: absolute; top: 2000px; left: 160px; right: 160px;
+    z-index: 10;
+  }
+
+  .showcase-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 84px; font-weight: 700;
+    color: #4E342E;
+    text-align: center;
+    margin-bottom: 60px;
+    letter-spacing: 10px;
+  }
+
+  .showcase-grid {
+    display: flex; gap: 50px;
+  }
+
+  .showcase-item {
+    flex: 1;
+    background: rgba(255,255,255,0.78);
+    border-radius: 40px;
+    padding: 50px 40px;
+    text-align: center;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.07);
+    border-left: 10px solid #F5A623;
+  }
+
+  .showcase-emoji {
+    font-size: 100px;
+    margin-bottom: 25px;
+  }
+
+  .showcase-name {
+    font-size: 44px; font-weight: 700;
+    color: #4E342E;
+    margin-bottom: 18px;
+  }
+
+  .showcase-text {
+    font-size: 30px; font-weight: 300;
+    color: #5D4037;
+    line-height: 1.6;
+  }
+
+  /* Bottom bar */
+  .bottom-bar {
+    position: absolute; bottom: 120px; left: 160px; right: 160px;
+    z-index: 10;
+    display: flex; justify-content: space-between;
+    align-items: center;
+  }
+
+  .qr-area {
+    display: flex; align-items: center; gap: 30px;
+  }
+
+  .qr-placeholder {
+    width: 200px; height: 200px;
+    background: #fff;
+    border-radius: 30px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; color: #8D6E63;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    border: 3px dashed #F5A623;
+  }
+
+  .qr-label {
+    font-size: 36px; font-weight: 500;
+    color: #5D4037;
+    line-height: 1.5;
+  }
+
+  .contact-info {
+    text-align: right;
+    font-size: 32px; font-weight: 300;
+    color: #5D4037;
+    line-height: 1.8;
+  }
+
+  .contact-info strong {
+    font-weight: 700;
+    color: #4E342E;
+  }
+
+  /* Bee animations */
+  .bee-float {
+    position: absolute; z-index: 5;
+    font-size: 80px;
+    animation: floatAround 8s ease-in-out infinite;
+  }
+
+  @keyframes floatAround {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(40px, -30px) rotate(5deg); }
+    50% { transform: translate(0, -60px) rotate(0deg); }
+    75% { transform: translate(-40px, -30px) rotate(-5deg); }
+  }
+
+  /* Honey drip */
+  .honey-drip {
+    position: absolute; z-index: 2;
+    width: 8px;
+    background: linear-gradient(180deg, #F5A623, #FFD07B, transparent);
+    border-radius: 0 0 4px 4px;
+    animation: dripDown 4s ease-in infinite;
+  }
+
+  @keyframes dripDown {
+    0% { height: 0; opacity: 0.8; }
+    40% { height: 120px; opacity: 0.6; }
+    80% { height: 200px; opacity: 0.2; }
+    100% { height: 240px; opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Background decorations -->
+<div class="bg-hex" style="top:200px;left:80px;transform:rotate(15deg);"></div>
+<div class="bg-hex" style="top:600px;right:100px;transform:rotate(45deg);width:200px;height:226px;"></div>
+<div class="bg-hex" style="top:3200px;left:120px;transform:rotate(10deg);width:240px;height:270px;"></div>
+<div class="bg-hex" style="top:3800px;right:80px;transform:rotate(30deg);"></div>
+<div class="bg-mountain"></div>
+
+<!-- Floating bees -->
+<div class="bee-float" style="top:800px;left:10%;animation-delay:0s;">🐝</div>
+<div class="bee-float" style="top:1600px;right:8%;animation-delay:3s;">🐝</div>
+<div class="bee-float" style="top:2800px;left:6%;animation-delay:5s;">🐝</div>
+
+<!-- Honey drips -->
+<div class="honey-drip" style="top:200px;left:18%;animation-delay:0s;"></div>
+<div class="honey-drip" style="top:500px;right:22%;animation-delay:2s;"></div>
+
+<!-- Title -->
+<div class="title-area">
+  <div class="title-cn">龙洋蜂岛<br>物&emsp;语</div>
+  <div class="title-sub">—— 浙江 · 丽水 · 遂昌 · 龙洋乡 ——</div>
+  <div class="title-en">LONGYANG BEE ISLAND CHRONICLES</div>
+  <div class="location-tag">🐝 九龙山下 · 中华蜜蜂之乡 🐝</div>
+</div>
+
+<!-- Feature cards -->
+<div class="features">
+  <div class="feature-card">
+    <div class="feature-icon">🏔️</div>
+    <div class="feature-title">九龙山生态</div>
+    <div class="feature-desc">国家级自然保护区<br>千米海拔原始森林<br>乌溪江源头清流</div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🐝</div>
+    <div class="feature-title">中华蜜蜂</div>
+    <div class="feature-desc">遂昌土蜂蜜地理标志<br>外龙口百年养蜂村<br>阿土哥匠心传承</div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🎨</div>
+    <div class="feature-title">非遗传承</div>
+    <div class="feature-desc">龙排·长粽·糖画<br>茶园武术·山歌<br>活态文化体验</div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">📚</div>
+    <div class="feature-title">自然科普</div>
+    <div class="feature-desc">蜜蜂王国探秘<br>采蜜·酿蜜·分蜂<br>生态链互动课堂</div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🎮</div>
+    <div class="feature-title">轻量养成</div>
+    <div class="feature-desc">蜂群培育·采蜜收集<br>蜂场扩建·图鉴解锁<br>休闲不肝随时玩</div>
+  </div>
+</div>
+
+<!-- Showcase -->
+<div class="showcase">
+  <div class="showcase-title">✨ 龙洋蜂岛六大场景 ✨</div>
+  <div class="showcase-grid">
+    <div class="showcase-item">
+      <div class="showcase-emoji">🏡</div>
+      <div class="showcase-name">埠头洋蜂场</div>
+      <div class="showcase-text">乌溪江畔·外龙口<br>百年蜂村·蜜源秘境<br>阿土哥的蜂箱等你来</div>
+    </div>
+    <div class="showcase-item">
+      <div class="showcase-emoji">🏔️</div>
+      <div class="showcase-name">九龙山探秘</div>
+      <div class="showcase-text">千米高山·原始森林<br>追踪野蜂·采集花蜜<br>发现稀有蜜源植物</div>
+    </div>
+    <div class="showcase-item">
+      <div class="showcase-emoji">🍯</div>
+      <div class="showcase-name">甜蜜工坊</div>
+      <div class="showcase-text">摇蜜·过滤·装瓶<br>蜂蜜柠檬水·蜂蜡唇膏<br>手工体验·成果带回家</div>
+    </div>
+  </div>
+  <div class="showcase-grid" style="margin-top:50px;">
+    <div class="showcase-item">
+      <div class="showcase-emoji">🎪</div>
+      <div class="showcase-name">非遗市集</div>
+      <div class="showcase-text">龙排竞渡·长粽飘香<br>糖画蜜绘·茶园武术<br>沉浸式文化嘉年华</div>
+    </div>
+    <div class="showcase-item">
+      <div class="showcase-emoji">📖</div>
+      <div class="showcase-name">蜜蜂学堂</div>
+      <div class="showcase-text">蜂王·工蜂·雄蜂<br>八字舞·分蜂·筑巢<br>AR互动·寓教于乐</div>
+    </div>
+    <div class="showcase-item">
+      <div class="showcase-emoji">🏆</div>
+      <div class="showcase-name">蜂王挑战</div>
+      <div class="showcase-text">答题闯关·蜜源收集<br>蜂场排名·成就徽章<br>与好友PK蜜蜂王国</div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom bar -->
+<div class="bottom-bar" style="bottom:120px;">
+  <div class="qr-area">
+    <div class="qr-placeholder">扫码体验<br>蜂岛物语<br>📱</div>
+    <div class="qr-label">
+      龙洋蜂岛物语<br>
+      <span style="font-size:28px;color:#8D6E63;">huiyuanai5201314.github.io<br>/bee-island-game/</span>
+    </div>
+  </div>
+  <div class="contact-info">
+    <strong>浙江省丽水市遂昌县龙洋乡</strong><br>
+    九龙山国家级自然保护区<br>
+    中华蜜蜂（遂昌土蜂蜜）地理标志产地<br>
+    <span style="font-size:28px;color:#8D6E63;">海报生成日期：2026年6月18日</span>
+  </div>
+</div>
+
+</body>
+</html>
